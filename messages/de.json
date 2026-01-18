@@ -36,7 +36,9 @@
       "rotateAllLeft": "Rotate All Left",
       "rotateAllRight": "Rotate All Right",
       "confirm": "Bestätigen",
-      "add": "Hinzufügen"
+      "add": "Hinzufügen",
+      "fullscreen": "Vollbild",
+      "exitFullscreen": "Vollbildmodus verlassen"
     },
     "status": {
       "idle": "Bereit",

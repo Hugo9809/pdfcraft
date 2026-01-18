@@ -1,10 +1,13 @@
 ﻿'use client';
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { saveFileToOPFS, loadFileFromOPFS, deleteFileFromOPFS } from '@/lib/storage/file-system';
 import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+
+const SESSION_FILE_NAME = 'current_stamp_session.pdf';
 
 export interface StampsToolProps {
   className?: string;
@@ -35,11 +38,75 @@ export function StampsTool({ className = '' }: StampsToolProps) {
     };
   }, [stampState.blobUrl]);
 
+  // Restore session on mount
+  useEffect(() => {
+    const restoreSession = async () => {
+      if (stampState.file) return;
+      try {
+        const blob = await loadFileFromOPFS(SESSION_FILE_NAME);
+        if (blob) {
+          const restoredFile = new File([blob], 'restored_document.pdf', { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(restoredFile);
+
+          // Configure PDF.js preferences
+          try {
+            const existingPrefsRaw = localStorage.getItem('pdfjs.preferences');
+            const existingPrefs = existingPrefsRaw ? JSON.parse(existingPrefsRaw) : {};
+            const newPrefs = {
+              ...existingPrefs,
+              enablePermissions: false,
+            };
+            localStorage.setItem('pdfjs.preferences', JSON.stringify(newPrefs));
+          } catch (e) {
+            console.warn('Could not set PDF.js preferences:', e);
+          }
+
+          setStampState({
+            file: restoredFile,
+            blobUrl,
+            viewerReady: false,
+          });
+          console.log('Stamp session restored from OPFS');
+        }
+      } catch (e) {
+        console.log('No existing stamp session to restore');
+      }
+    };
+    restoreSession();
+  }, []);
+
+  // Listen for messages from the viewer
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data?.type === 'PDF_SESSION_BACKUP') {
+        const { blob } = event.data;
+        if (blob) {
+          saveFileToOPFS(SESSION_FILE_NAME, blob).catch(console.warn);
+        }
+        return;
+      }
+
+      if (event.data?.type === 'PDF_SAVE_DATA') {
+        const { blob } = event.data;
+        if (blob) {
+          saveFileToOPFS(SESSION_FILE_NAME, blob).catch(console.warn);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const handleFilesSelected = useCallback((files: File[]) => {
     if (files.length > 0) {
       const file = files[0];
       if (stampState.blobUrl) URL.revokeObjectURL(stampState.blobUrl);
       const blobUrl = URL.createObjectURL(file);
+
+      // Save for persistence
+      saveFileToOPFS(SESSION_FILE_NAME, file).catch(console.error);
+
       setStampState({ file, blobUrl, viewerReady: false });
       setError(null);
     }
@@ -60,7 +127,7 @@ export function StampsTool({ className = '' }: StampsToolProps) {
       setIsProcessing(true);
       const win = iframeRef.current.contentWindow as any;
       const app = win?.PDFViewerApplication;
-      
+
       if (app?.pdfDocument) {
         // Use PDF.js native save with annotations
         const data = await app.pdfDocument.saveDocument();
@@ -84,8 +151,16 @@ export function StampsTool({ className = '' }: StampsToolProps) {
     }
   }, [stampState.viewerReady, stampState.file, tTools]);
 
-  const handleClear = useCallback(() => {
+  const handleClear = useCallback(async () => {
     if (stampState.blobUrl) URL.revokeObjectURL(stampState.blobUrl);
+
+    // Clear session from OPFS
+    try {
+      await deleteFileFromOPFS(SESSION_FILE_NAME);
+    } catch (e) {
+      // Ignore
+    }
+
     setStampState({ file: null, blobUrl: null, viewerReady: false });
     setError(null);
   }, [stampState.blobUrl]);

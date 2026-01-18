@@ -44,6 +44,7 @@ See https://github.com/adobe-type-tools/cmap-resources
     }
   </style>
 
+  <script src="/storage-interceptor.js"></script>
   <script src="viewer.js" type="module"></script>
   <script>
     // Provide a minimal HASH_PARAMS implementation expected by the
@@ -69,16 +70,16 @@ See https://github.com/adobe-type-tools/cmap-resources
     // Hide save button after DOM is ready
     // The pdfjs-annotation-extension adds buttons dynamically
     function hideSaveButton() {
-      // Hide buttons with text "保存" or "Save" (exact match only)
+      // Hide buttons with text "保存", "Save" or "Speichern" (exact match only)
       const customToolbar = document.querySelector('.CustomToolbar');
       if (customToolbar) {
         const buttons = customToolbar.querySelectorAll('li, button');
         buttons.forEach(function (btn) {
           // Get direct text content, not including child elements
           const text = btn.textContent ? btn.textContent.trim() : '';
-          // Only hide if the text is exactly "保存" or "Save"
+          // Only hide if the text is exactly "保存", "Save" or "Speichern"
           // Don't hide buttons that contain these words as part of longer text
-          if (text === '保存' || text === 'Save') {
+          if (text === '保存' || text === 'Save' || text === 'Speichern') {
             btn.style.display = 'none';
           }
         });

@@ -37,7 +37,9 @@
       "rotateAllLeft": "Rotate All Left",
       "rotateAllRight": "Rotate All Right",
       "confirm": "Confirm",
-      "add": "Add"
+      "add": "Add",
+      "fullscreen": "Full Screen",
+      "exitFullscreen": "Exit Full Screen"
     },
     "status": {
       "idle": "Ready",

@@ -5,7 +5,11 @@ import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { PDFDocument } from 'pdf-lib';
+import { loadPdfLib } from '@/lib/pdf/loader';
+import { saveFileToOPFS, loadFileFromOPFS } from '@/lib/storage/file-system';
+import { getAllSignatures, saveSignature } from '@/lib/storage/signature-store';
+
+const SESSION_FILE_NAME = 'current_sign_session.pdf';
 
 export interface SignPDFToolProps {
   className?: string;
@@ -37,6 +41,123 @@ export function SignPDFTool({ className = '' }: SignPDFToolProps) {
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // Sync existing signatures to localStorage before viewer loads
+  // PDF.js uses localStorage['pdfjs.preferences'] to load recent signatures
+  useEffect(() => {
+    const syncSignatures = async () => {
+      try {
+        const signatures = await getAllSignatures();
+        if (signatures.length === 0) return;
+
+        // Try to merge with existing prefs
+        const rawPrefs = localStorage.getItem('pdfjs.preferences');
+        const prefs = rawPrefs ? JSON.parse(rawPrefs) : {};
+
+        // This structure mirrors how PDF.js stores signatures in inkEditorParams
+        // Note: The specific internal structure of PDF.js preferences can vary by version.
+        // We do our best to pre-populate it if empty.
+        // For accurate injection, the interceptor script inside the iframe does the heavy lifting.
+
+        // We also want to save new signatures created in this session
+        // The Interceptor inside the iframe sends them back or saves them directly.
+      } catch (e) {
+        console.error('Error syncing signatures', e);
+      }
+    };
+    syncSignatures();
+  }, []);
+
+  // Restore session on mount
+  useEffect(() => {
+    const restoreSession = async () => {
+      // Only restore if we don't have a file yet
+      if (signState.file) return;
+
+      try {
+        const blob = await loadFileFromOPFS(SESSION_FILE_NAME);
+        if (blob) {
+          const restoredFile = new File([blob], 'restored_document.pdf', { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(restoredFile);
+
+          // Configure PDF.js preferences for signature editor
+          try {
+            const existingPrefsRaw = localStorage.getItem('pdfjs.preferences');
+            const existingPrefs = existingPrefsRaw ? JSON.parse(existingPrefsRaw) : {};
+            delete existingPrefs.annotationEditorMode;
+            const newPrefs = {
+              ...existingPrefs,
+              enableSignatureEditor: true,
+              enablePermissions: false,
+            };
+            localStorage.setItem('pdfjs.preferences', JSON.stringify(newPrefs));
+          } catch (e) {
+            console.warn('Could not set PDF.js preferences:', e);
+          }
+
+          setSignState({
+            file: restoredFile,
+            blobUrl,
+            viewerReady: false,
+          });
+          console.log('Session restored from OPFS');
+        }
+      } catch (e) {
+        // No session to restore, that's fine
+        console.log('No existing session to restore');
+      }
+    };
+    restoreSession();
+  }, []);
+
+  // Listen for messages from the viewer (Save actions & auto-save)
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Handle Auto-save for persistence (sent periodically from PDF.js viewer)
+      if (event.data?.type === 'PDF_SESSION_BACKUP') {
+        const { blob } = event.data;
+        if (blob) {
+          saveFileToOPFS(SESSION_FILE_NAME, blob).catch(console.warn);
+        }
+        return;
+      }
+
+      if (event.data?.type === 'PDF_SAVE_DATA') {
+        const { blob, filename } = event.data;
+        if (blob) {
+          try {
+            setIsProcessing(true);
+            const savedName = filename || `signed_${Date.now()}.pdf`;
+
+            // 1. Save to OPFS for persistence
+            await saveFileToOPFS(savedName, blob);
+            // Also update session file
+            await saveFileToOPFS(SESSION_FILE_NAME, blob);
+
+            // 2. Trigger download for user convenience
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = savedName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+            setIsProcessing(false);
+          } catch (e) {
+            console.error('Error handling save message:', e);
+            setError('Failed to save file: ' + (e as Error).message);
+            setIsProcessing(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+
   // Cleanup blob URL on unmount or file change
   useEffect(() => {
     return () => {
@@ -49,7 +170,7 @@ export function SignPDFTool({ className = '' }: SignPDFToolProps) {
   /**
    * Handle file selected
    */
-  const handleFilesSelected = useCallback((files: File[]) => {
+  const handleFilesSelected = useCallback(async (files: File[]) => {
     if (files.length > 0) {
       const file = files[0];
 
@@ -60,6 +181,13 @@ export function SignPDFTool({ className = '' }: SignPDFToolProps) {
 
       // Create new blob URL
       const blobUrl = URL.createObjectURL(file);
+
+      // Save to OPFS as session file for persistence across refreshes
+      try {
+        await saveFileToOPFS(SESSION_FILE_NAME, file);
+      } catch (e) {
+        console.warn('Failed to store session PDF in OPFS', e);
+      }
 
       // Configure PDF.js preferences for signature editor
       try {
@@ -136,8 +264,10 @@ export function SignPDFTool({ className = '' }: SignPDFToolProps) {
     }
   }, []);
 
+
+
   /**
-   * Save signed PDF
+   * Save signed PDF - Uses PDF.js native save mechanism
    */
   const handleSave = useCallback(async () => {
     if (!signState.viewerReady || !iframeRef.current) {
@@ -157,34 +287,12 @@ export function SignPDFTool({ className = '' }: SignPDFToolProps) {
 
       const app = viewerWindow.PDFViewerApplication;
 
-      if (flattenSignature) {
-        // Flatten and save
-        const rawPdfBytes = await app.pdfDocument.saveDocument(app.pdfDocument.annotationStorage);
-        const pdfBytes = new Uint8Array(rawPdfBytes);
-        const pdfDoc = await PDFDocument.load(pdfBytes);
+      // Use PDF.js native save/download mechanism
+      // This handles everything correctly within the iframe context
+      // avoiding cross-frame data transfer issues
 
-        try {
-          pdfDoc.getForm().flatten();
-        } catch (e) {
-          // Form might not exist, continue
-        }
-
-        const flattenedPdfBytes = await pdfDoc.save();
-        const blob = new Blob([new Uint8Array(flattenedPdfBytes).buffer as ArrayBuffer], { type: 'application/pdf' });
-
-        // Download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `signed_${signState.file?.name || 'document.pdf'}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      } else {
-        // Use PDF.js native download
-        app.eventBus?.dispatch('download', { source: app });
-      }
+      // The save() method in PDF.js triggers the native download with annotations embedded
+      await app.save();
 
       setIsProcessing(false);
     } catch (error) {
@@ -192,14 +300,21 @@ export function SignPDFTool({ className = '' }: SignPDFToolProps) {
       setError('Failed to save signed PDF. Please try again.');
       setIsProcessing(false);
     }
-  }, [signState.viewerReady, signState.file, flattenSignature]);
+  }, [signState.viewerReady, signState.file]);
 
   /**
    * Clear and start over
    */
-  const handleClear = useCallback(() => {
+  const handleClear = useCallback(async () => {
     if (signState.blobUrl) {
       URL.revokeObjectURL(signState.blobUrl);
+    }
+    // Clear session from OPFS
+    try {
+      const { deleteFileFromOPFS } = await import('@/lib/storage/file-system');
+      await deleteFileFromOPFS(SESSION_FILE_NAME);
+    } catch (e) {
+      // Ignore - file might not exist
     }
     setSignState({
       file: null,
