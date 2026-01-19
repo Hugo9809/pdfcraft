@@ -8,10 +8,12 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Clock, X, Trash2, FileText, ChevronDown } from 'lucide-react';
 import { useRecentFiles } from '@/lib/hooks/useRecentFiles';
-import { formatFileSize, formatDate } from '@/lib/storage/recent-files';
+import { formatFileSize, formatDate, type RecentFile } from '@/lib/storage/recent-files';
+import { loadFileFromOPFS } from '@/lib/storage/file-system';
+import { usePendingFile } from '@/lib/contexts/PendingFileContext';
 import { Button } from '@/components/ui/Button';
 import { type Locale } from '@/lib/i18n/config';
 
@@ -29,11 +31,14 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
   locale,
   translations,
 }) => {
+  const router = useRouter();
   const { recentFiles, removeFile, clearAll, isLoading } = useRecentFiles();
+  const { setPendingFile } = usePendingFile();
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -112,6 +117,35 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
     }
   }, [recentFiles.length]);
 
+  /**
+   * Handle clicking on a recent file
+   * Loads the file from OPFS if available and navigates to the tool
+   */
+  const handleFileClick = useCallback(async (file: RecentFile) => {
+    setLoadingFileId(file.id);
+
+    try {
+      if (file.storagePath) {
+        // Load file from OPFS
+        const blob = await loadFileFromOPFS(file.storagePath);
+        // Convert Blob to File with proper name
+        const loadedFile = new File([blob], file.name, { type: blob.type || 'application/pdf' });
+        // Set as pending file for the tool to consume
+        setPendingFile(loadedFile, file.toolUsed, file.name);
+      }
+    } catch (error) {
+      console.warn('Failed to load file from OPFS:', error);
+      // Continue with navigation even if file loading fails
+    }
+
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    setLoadingFileId(null);
+
+    // Navigate to the tool
+    router.push(`/${locale}/tools/${file.toolUsed}`);
+  }, [locale, router, setPendingFile]);
+
   if (isLoading) {
     return null;
   }
@@ -185,22 +219,22 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
                   role="menuitem"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <Link
+                    <button
                       ref={(el) => { itemRefs.current[index] = el; }}
-                      href={`/${locale}/tools/${file.toolUsed}`}
-                      className="flex-1 min-w-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-ring))] rounded-sm"
+                      onClick={() => handleFileClick(file)}
+                      className="flex-1 min-w-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-ring))] rounded-sm"
                       tabIndex={focusedIndex === index ? 0 : -1}
-                      onClick={() => {
-                        setIsOpen(false);
-                        setFocusedIndex(-1);
-                      }}
                       onKeyDown={(e) => handleItemKeyDown(e, index)}
+                      disabled={loadingFileId === file.id}
                     >
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-[hsl(var(--color-primary))] flex-shrink-0" aria-hidden="true" />
                         <span className="text-sm font-medium text-[hsl(var(--color-foreground))] truncate">
                           {file.name}
                         </span>
+                        {loadingFileId === file.id && (
+                          <span className="text-xs text-[hsl(var(--color-muted-foreground))]">Loading...</span>
+                        )}
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-xs text-[hsl(var(--color-muted-foreground))]">
                         <span>{formatFileSize(file.size)}</span>
@@ -210,7 +244,7 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
                       <div className="mt-0.5 text-xs text-[hsl(var(--color-muted-foreground))]">
                         {translations.processedWith} {file.toolName || file.toolUsed}
                       </div>
-                    </Link>
+                    </button>
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -235,3 +269,4 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
 };
 
 export default RecentFilesDropdown;
+

@@ -193,18 +193,7 @@ export function generateToolsListMetadata(locale: Locale): Metadata {
   });
 }
 
-/**
- * Generate metadata for the about page
- */
-export function generateAboutMetadata(locale: Locale): Metadata {
-  return generateBaseMetadata({
-    locale,
-    path: '/about',
-    title: 'About',
-    description: `Learn about ${siteConfig.name} - your free, private, and powerful PDF toolkit. All processing happens in your browser.`,
-    keywords: ['about', 'PDF tools', 'privacy', 'browser-based'],
-  });
-}
+
 
 /**
  * Generate metadata for the FAQ page

@@ -55,7 +55,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
   const mainNavItems = [
     { href: `/${locale}`, label: tCommon('navigation.home') },
     { href: `/${locale}/tools`, label: tCommon('navigation.tools'), hasSubmenu: true },
-    { href: `/${locale}/about`, label: tCommon('navigation.about') },
     { href: `/${locale}/faq`, label: tCommon('navigation.faq') },
     { href: `/${locale}/privacy`, label: tCommon('navigation.privacy') },
     { href: `/${locale}/contact`, label: tCommon('navigation.contact') },
@@ -66,15 +65,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
     if (isOpen) {
       // Store the currently focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
-      
+
       // Focus the close button when menu opens
       closeButtonRef.current?.focus();
-      
+
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
-      
+
       // Restore focus to the previously focused element
       if (previousActiveElement.current) {
         previousActiveElement.current.focus();
@@ -129,15 +128,15 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (touchStart === null) return;
-    
+
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStart - touchEnd;
-    
+
     // Swipe left to close (for LTR) - threshold of 100px
     if (diff > 100) {
       onClose();
     }
-    
+
     setTouchStart(null);
   }, [touchStart, onClose]);
 
@@ -211,7 +210,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose, locale 
                         <ChevronRight className="h-4 w-4" aria-hidden="true" />
                       )}
                     </button>
-                    
+
                     {/* Submenu */}
                     {expandedCategory === 'tools' && (
                       <ul className="ml-4 mt-1 border-l-2 border-[hsl(var(--color-border))]">

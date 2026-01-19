@@ -5,6 +5,7 @@ import { mergeWithFallback } from '@/lib/i18n/fallback';
 export default getRequestConfig(async ({ requestLocale }) => {
   // This typically corresponds to the `[locale]` segment
   let locale = await requestLocale;
+  console.log(`[i18n] Loading locale: ${locale}`);
 
   // Ensure that the incoming locale is valid
   if (!locale || !routing.locales.includes(locale as typeof routing.locales[number])) {
@@ -29,8 +30,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   // Merge locale messages with English fallback
   // This ensures all keys are available, falling back to English for missing ones
-  const messages = locale === 'en' 
-    ? englishMessages 
+  const messages = locale === 'en'
+    ? englishMessages
     : mergeWithFallback(localeMessages, englishMessages);
 
   return {

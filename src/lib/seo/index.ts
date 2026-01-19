@@ -10,7 +10,6 @@ export {
   generateToolMetadata,
   generateHomeMetadata,
   generateToolsListMetadata,
-  generateAboutMetadata,
   generateFaqMetadata,
   generatePrivacyMetadata,
   getCanonicalUrl,

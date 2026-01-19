@@ -71,7 +71,7 @@ export function ToolCard({ tool, locale, className = '', localizedContent }: Too
           <div className="flex items-start gap-4 mb-4">
             {/* Tool Icon */}
             <div
-              className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--color-primary)/0.1)] to-[hsl(var(--color-accent)/0.1)] flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
+              className="flex-shrink-0 w-14 h-14 rounded-2xl bg-[hsl(var(--color-primary)/0.1)] flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
               data-testid="tool-card-icon"
               aria-hidden="true"
             >

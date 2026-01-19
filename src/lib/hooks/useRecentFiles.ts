@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   type RecentFile,
+  RECENT_FILES_EVENT,
   getRecentFiles,
   addRecentFile,
   removeRecentFile,
@@ -28,10 +29,22 @@ export function useRecentFiles(): UseRecentFilesReturn {
   const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load recent files on mount
+  // Load recent files on mount and subscribe to updates
   useEffect(() => {
-    setRecentFiles(getRecentFiles());
-    setIsLoading(false);
+    const loadFiles = () => {
+      setRecentFiles(getRecentFiles());
+      setIsLoading(false);
+    };
+
+    loadFiles();
+
+    window.addEventListener(RECENT_FILES_EVENT, loadFiles);
+    window.addEventListener('storage', loadFiles);
+
+    return () => {
+      window.removeEventListener(RECENT_FILES_EVENT, loadFiles);
+      window.removeEventListener('storage', loadFiles);
+    };
   }, []);
 
   const addFile = useCallback(

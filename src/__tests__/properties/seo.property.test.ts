@@ -5,12 +5,11 @@
 
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { 
+import {
   generateBaseMetadata,
   generateToolMetadata,
   generateHomeMetadata,
   generateToolsListMetadata,
-  generateAboutMetadata,
   generateFaqMetadata,
   generatePrivacyMetadata,
   validateMetadata,
@@ -76,27 +75,23 @@ describe('SEO Property Tests', () => {
             const homeValidation = validateMetadata(homeMetadata);
             expect(homeValidation.valid).toBe(true);
             expect(homeValidation.missingFields).toHaveLength(0);
-            
+
             // Test tools list metadata
             const toolsMetadata = generateToolsListMetadata(locale);
             const toolsValidation = validateMetadata(toolsMetadata);
             expect(toolsValidation.valid).toBe(true);
-            
-            // Test about page metadata
-            const aboutMetadata = generateAboutMetadata(locale);
-            const aboutValidation = validateMetadata(aboutMetadata);
-            expect(aboutValidation.valid).toBe(true);
-            
+
+
             // Test FAQ page metadata
             const faqMetadata = generateFaqMetadata(locale);
             const faqValidation = validateMetadata(faqMetadata);
             expect(faqValidation.valid).toBe(true);
-            
+
             // Test privacy page metadata
             const privacyMetadata = generatePrivacyMetadata(locale);
             const privacyValidation = validateMetadata(privacyMetadata);
             expect(privacyValidation.valid).toBe(true);
-            
+
             return true;
           }
         ),
@@ -113,10 +108,10 @@ describe('SEO Property Tests', () => {
             const content = createMockToolContent(tool);
             const metadata = generateToolMetadata({ locale, tool, content });
             const validation = validateMetadata(metadata);
-            
+
             expect(validation.valid).toBe(true);
             expect(validation.missingFields).toHaveLength(0);
-            
+
             // Verify specific required fields
             expect(metadata.title).toBeTruthy();
             expect(metadata.description).toBeTruthy();
@@ -127,7 +122,7 @@ describe('SEO Property Tests', () => {
             expect(metadata.twitter?.card).toBeTruthy();
             expect(metadata.twitter?.title).toBeTruthy();
             expect(metadata.twitter?.description).toBeTruthy();
-            
+
             return true;
           }
         ),
@@ -139,7 +134,7 @@ describe('SEO Property Tests', () => {
       fc.assert(
         fc.property(
           fc.constantFrom(...locales),
-          fc.constantFrom('/tools/merge-pdf', '/about', '/faq', ''),
+          fc.constantFrom('/tools/merge-pdf', '/faq', ''),
           (locale, path) => {
             const metadata = generateBaseMetadata({
               locale,
@@ -147,24 +142,24 @@ describe('SEO Property Tests', () => {
               title: 'Test Page',
               description: 'Test description',
             });
-            
+
             // Check canonical URL
             expect(metadata.alternates?.canonical).toBeTruthy();
             expect(metadata.alternates?.canonical).toContain(locale);
-            
+
             // Check alternate language URLs
             expect(metadata.alternates?.languages).toBeDefined();
             const languages = metadata.alternates?.languages as Record<string, string>;
-            
+
             // All locales should be present
             for (const loc of locales) {
               expect(languages[loc]).toBeTruthy();
               expect(languages[loc]).toContain(loc);
             }
-            
+
             // x-default should be present
             expect(languages['x-default']).toBeTruthy();
-            
+
             return true;
           }
         ),
@@ -179,11 +174,11 @@ describe('SEO Property Tests', () => {
           (locale) => {
             const metadata = generateHomeMetadata(locale);
             const ogLocale = metadata.openGraph?.locale;
-            
+
             expect(ogLocale).toBeTruthy();
             // OG locale should be in format xx_XX
             expect(ogLocale).toMatch(/^[a-z]{2}_[A-Z]{2}$/);
-            
+
             return true;
           }
         ),
@@ -209,14 +204,14 @@ describe('SEO Property Tests', () => {
             const content = createMockToolContent(tool);
             const schema = generateSoftwareApplicationSchema(tool, content, locale);
             const validation = validateSoftwareApplicationSchema(schema);
-            
+
             expect(validation.valid).toBe(true);
             expect(validation.missingFields).toHaveLength(0);
-            
+
             // Verify @type is SoftwareApplication
             expect(schema['@type']).toBe('SoftwareApplication');
             expect(schema['@context']).toBe('https://schema.org');
-            
+
             // Verify required fields
             expect(schema.name).toBeTruthy();
             expect(schema.description).toBeTruthy();
@@ -226,7 +221,7 @@ describe('SEO Property Tests', () => {
             expect(schema.operatingSystem).toBe('Web Browser');
             expect(schema.offers).toBeDefined();
             expect(schema.offers.price).toBe('0');
-            
+
             return true;
           }
         ),
@@ -242,19 +237,19 @@ describe('SEO Property Tests', () => {
             const content = createMockToolContent(tool);
             const schema = generateFAQPageSchema(content.faq);
             const validation = validateFAQPageSchema(schema);
-            
+
             expect(validation.valid).toBe(true);
             expect(validation.missingFields).toHaveLength(0);
-            
+
             // Verify @type is FAQPage
             expect(schema['@type']).toBe('FAQPage');
             expect(schema['@context']).toBe('https://schema.org');
-            
+
             // Verify mainEntity structure
             expect(schema.mainEntity).toBeDefined();
             expect(Array.isArray(schema.mainEntity)).toBe(true);
             expect(schema.mainEntity.length).toBe(content.faq.length);
-            
+
             // Verify each FAQ item
             for (let i = 0; i < schema.mainEntity.length; i++) {
               const item = schema.mainEntity[i];
@@ -263,7 +258,7 @@ describe('SEO Property Tests', () => {
               expect(item.acceptedAnswer['@type']).toBe('Answer');
               expect(item.acceptedAnswer.text).toBe(content.faq[i].answer);
             }
-            
+
             return true;
           }
         ),
@@ -279,21 +274,21 @@ describe('SEO Property Tests', () => {
           (locale, tool) => {
             const content = createMockToolContent(tool);
             const structuredData = generateToolPageStructuredData(tool, content, locale);
-            
+
             // SoftwareApplication should always be present
             expect(structuredData.softwareApplication).toBeDefined();
             expect(structuredData.softwareApplication['@type']).toBe('SoftwareApplication');
-            
+
             // FAQPage should be present when FAQs exist
             if (content.faq && content.faq.length > 0) {
               expect(structuredData.faqPage).toBeDefined();
               expect(structuredData.faqPage?.['@type']).toBe('FAQPage');
             }
-            
+
             // Breadcrumb should be present
             expect(structuredData.breadcrumb).toBeDefined();
             expect(structuredData.breadcrumb['@type']).toBe('BreadcrumbList');
-            
+
             return true;
           }
         ),
@@ -304,7 +299,7 @@ describe('SEO Property Tests', () => {
     it('FAQPage schema handles empty FAQ array correctly', () => {
       const emptyFaqs: FAQ[] = [];
       const schema = generateFAQPageSchema(emptyFaqs);
-      
+
       expect(schema['@type']).toBe('FAQPage');
       expect(schema.mainEntity).toHaveLength(0);
     });
@@ -317,16 +312,16 @@ describe('SEO Property Tests', () => {
           (locale, tool) => {
             const content = createMockToolContent(tool);
             const schema = generateSoftwareApplicationSchema(tool, content, locale);
-            
+
             // URL should contain the locale
             expect(schema.url).toContain(`/${locale}/`);
-            
+
             // URL should contain the tool slug
             expect(schema.url).toContain(`/tools/${tool.slug}`);
-            
+
             // URL should be a valid URL format
             expect(schema.url).toMatch(/^https?:\/\//);
-            
+
             return true;
           }
         ),
@@ -346,14 +341,14 @@ describe('SEO Property Tests', () => {
           fc.constantFrom('/tools/merge-pdf', '/about', '/faq', ''),
           (locale, path) => {
             const url = getCanonicalUrl(locale, path);
-            
+
             expect(url).toContain(locale);
             expect(url).toMatch(/^https?:\/\//);
-            
+
             if (path) {
               expect(url).toContain(path);
             }
-            
+
             return true;
           }
         ),
@@ -364,14 +359,14 @@ describe('SEO Property Tests', () => {
     it('getAlternateUrls includes all locales', () => {
       const path = '/tools/merge-pdf';
       const alternates = getAlternateUrls(path);
-      
+
       // All locales should be present
       for (const locale of locales) {
         expect(alternates[locale]).toBeTruthy();
         expect(alternates[locale]).toContain(locale);
         expect(alternates[locale]).toContain(path);
       }
-      
+
       // x-default should be present
       expect(alternates['x-default']).toBeTruthy();
       expect(alternates['x-default']).toContain('en');

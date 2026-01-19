@@ -151,7 +151,7 @@ function ToolHeader({ tool, content }: ToolHeaderProps) {
       <meta itemProp="price" content="0" />
       <meta itemProp="priceCurrency" content="USD" />
       <div
-        className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--color-primary)/0.1)] to-[hsl(var(--color-accent)/0.1)] mb-4 shadow-inner"
+        className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[hsl(var(--color-primary)/0.1)] mb-4 shadow-inner"
         aria-hidden="true"
       >
         <IconComponent className="w-8 h-8 text-[hsl(var(--color-primary))]" />

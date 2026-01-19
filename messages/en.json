@@ -297,13 +297,13 @@
   "contactPage": {
     "hero": {
       "title": "Contact Us",
-      "description": "Have a question, suggestion, or found a bug? We'd love to hear from you."
+      "description": "Have a question, suggestion, or found a bug? We'd love to hear from you. This is a modified version of the original."
     },
     "methods": {
       "email": {
-        "title": "Email",
+        "title": "Luca Zanner",
         "description": "Send us an email and we'll respond within 24-48 hours.",
-        "action": "contact@pdfcraft.app"
+        "action": "info@lucazanner.de"
       },
       "github": {
         "title": "GitHub",
@@ -600,6 +600,120 @@
         "name": "Crop & Resize Pages",
         "description": "Crop PDF pages and adjust page dimensions"
       }
+    }
+  },
+  "privacyPage": {
+    "title": "Privacy Policy",
+    "intro": "Your privacy is our top priority. {brand} is designed from the ground up to protect your data.",
+    "lastUpdated": "Last updated: December 2024",
+    "sections": {
+      "introduction": {
+        "title": "1. Introduction",
+        "content": "{brand} (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we handle your information when you use our PDF tools."
+      },
+      "service": {
+        "title": "2. How Our Service Works",
+        "content": "{brand} is a client-side application. This means:",
+        "list": {
+          "browser": "All PDF processing happens directly in your web browser",
+          "uploads": "Your files are never uploaded to our servers or any third-party servers",
+          "access": "We cannot see, access, or store your documents",
+          "device": "Your files remain on your device at all times"
+        }
+      },
+      "collection": {
+        "title": "3. Information We Collect",
+        "files": {
+          "title": "3.1 Your Files",
+          "content": "<strong1>We do not collect your files.</strong1> When you use our PDF tools, your files are processed entirely within your browser. They are never transmitted to our servers."
+        },
+        "usage": {
+          "title": "3.2 Usage Data",
+          "content": "We may collect anonymous usage statistics to improve our service, such as:",
+          "list": {
+            "popular": "Which tools are most popular",
+            "region": "General geographic region (country level)",
+            "browser": "Browser type and version",
+            "device": "Device type (desktop, mobile, tablet)"
+          },
+          "note": "This data is aggregated and anonymized. It cannot be used to identify you personally."
+        }
+      },
+      "storage": {
+        "title": "4. Local Storage",
+        "content": "{brand} may use your browser's local storage to:",
+        "list": {
+          "lang": "Remember your language preference",
+          "history": "Store your recent tool history",
+          "progress": "Save work-in-progress for interrupted sessions"
+        },
+        "note": "This data is stored only on your device and is not transmitted to us."
+      },
+      "cookies": {
+        "title": "5. Cookies",
+        "content": "We use minimal cookies for essential functionality:",
+        "list": {
+          "essential": "<strong1>Essential cookies:</strong1> Required for the website to function properly",
+          "preference": "<strong1>Preference cookies:</strong1> Remember your settings like language preference"
+        },
+        "note": "We do not use tracking cookies or advertising cookies."
+      },
+      "thirdParty": {
+        "title": "6. Third-Party Services",
+        "content": "{brand} does not share your data with third parties. We do not use:",
+        "list": {
+          "analytics": "Third-party analytics that track individual users",
+          "ads": "Advertising networks",
+          "social": "Social media tracking pixels",
+          "processing": "External file processing services"
+        }
+      },
+      "security": {
+        "title": "7. Data Security",
+        "content": "Since your files never leave your device, they are protected by your own device's security measures. We recommend:",
+        "list": {
+          "browser": "Using an up-to-date browser",
+          "os": "Keeping your operating system updated",
+          "network": "Using secure networks when handling sensitive documents"
+        }
+      },
+      "rights": {
+        "title": "8. Your Rights",
+        "content": "Since we don't collect personal data, there is no personal data to access, correct, or delete. You can clear your browser's local storage at any time to remove any preferences stored by {brand}."
+      },
+      "children": {
+        "title": "9. Children's Privacy",
+        "content": "{brand} is not directed at children under 13. We do not knowingly collect any information from children."
+      },
+      "changes": {
+        "title": "10. Changes to This Policy",
+        "content": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date."
+      },
+      "contact": {
+        "title": "11. Contact Us",
+        "content": "If you have any questions about this Privacy Policy, please contact us through our contact page."
+      }
+    },
+    "highlights": {
+      "server": {
+        "title": "No Server Uploads",
+        "description": "Your files are never uploaded to any server. All processing happens locally in your browser."
+      },
+      "local": {
+        "title": "Local Processing",
+        "description": "PDF operations are performed using JavaScript and WebAssembly directly on your device."
+      },
+      "cleanup": {
+        "title": "Automatic Cleanup",
+        "description": "All file data is automatically cleared when you close the browser tab or navigate away."
+      },
+      "tracking": {
+        "title": "No Tracking",
+        "description": "We don't track your file contents or personal information. Your documents remain private."
+      }
+    },
+    "badge": {
+      "description": "Your documents are processed securely in your browser"
     }
   },
   "tools": {

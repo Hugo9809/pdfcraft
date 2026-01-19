@@ -7,8 +7,7 @@ export const siteConfig = {
   url: 'https://pdfcraft.devtoolcafe.com',
   ogImage: '/images/og-image.png',
   links: {
-    github: 'https://github.com/PDFCraftTool/pdfcraft',
-    twitter: 'https://twitter.com/pdfcraft',
+    github: 'https://github.com/Hugo9809/pdfcraft',
   },
   creator: 'PDFCraft Team',
   keywords: [
@@ -39,7 +38,6 @@ export const navConfig = {
   mainNav: [
     { title: 'Home', href: '/' },
     { title: 'Tools', href: '/tools' },
-    { title: 'About', href: '/about' },
     { title: 'FAQ', href: '/faq' },
   ],
   footerNav: [

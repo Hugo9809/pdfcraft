@@ -92,10 +92,9 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
           aria-labelledby="hero-title"
         >
           {/* Animated Background Blobs */}
+          {/* Subtle Background */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-[hsl(var(--color-primary)/0.2)] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-[hsl(var(--color-accent)/0.2)] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000" />
-            <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-[hsl(var(--color-secondary)/0.3)] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000" />
+            <div className="absolute top-0 right-0 w-full h-full bg-[hsl(var(--color-background))]" />
           </div>
 
           <div className="container mx-auto px-4 relative z-10">
@@ -111,7 +110,7 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
               {/* Hero Title */}
               <h1 id="hero-title" className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
                 <span className="text-[hsl(var(--color-foreground))]">{t('home.hero.title')} </span>
-                <span className="text-gradient block mt-1 pb-2">{t('home.hero.highlight')}</span>
+                <span className="text-[hsl(var(--color-primary))] block mt-1 pb-2">{t('home.hero.highlight')}</span>
               </h1>
 
               {/* Hero Subtitle */}
@@ -268,7 +267,7 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-[hsl(var(--color-border))]">
               <div className="p-4">
-                <div className="text-3xl lg:text-4xl font-bold text-gradient mb-1">
+                <div className="text-3xl lg:text-4xl font-bold text-[hsl(var(--color-primary))] mb-1">
                   {allTools.length}+
                 </div>
                 <div className="text-xs font-medium text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider">
@@ -276,7 +275,7 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
                 </div>
               </div>
               <div className="p-4">
-                <div className="text-3xl lg:text-4xl font-bold text-gradient mb-1">
+                <div className="text-3xl lg:text-4xl font-bold text-[hsl(var(--color-primary))] mb-1">
                   100%
                 </div>
                 <div className="text-xs font-medium text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider">
@@ -284,7 +283,7 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
                 </div>
               </div>
               <div className="p-4">
-                <div className="text-3xl lg:text-4xl font-bold text-gradient mb-1">
+                <div className="text-3xl lg:text-4xl font-bold text-[hsl(var(--color-primary))] mb-1">
                   9
                 </div>
                 <div className="text-xs font-medium text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider">
@@ -292,7 +291,7 @@ export default function HomePageClient({ locale, localizedToolContent }: HomePag
                 </div>
               </div>
               <div className="p-4">
-                <div className="text-3xl lg:text-4xl font-bold text-gradient mb-1">
+                <div className="text-3xl lg:text-4xl font-bold text-[hsl(var(--color-primary))] mb-1">
                   0
                 </div>
                 <div className="text-xs font-medium text-[hsl(var(--color-muted-foreground))] uppercase tracking-wider">

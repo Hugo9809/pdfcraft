@@ -39,7 +39,6 @@ const CHANGE_FREQUENCY = {
 const STATIC_PAGES = [
   { path: '', priority: PRIORITY.home, changeFrequency: CHANGE_FREQUENCY.home },
   { path: '/tools', priority: PRIORITY.tools, changeFrequency: CHANGE_FREQUENCY.tools },
-  { path: '/about', priority: PRIORITY.static, changeFrequency: CHANGE_FREQUENCY.static },
   { path: '/faq', priority: PRIORITY.static, changeFrequency: CHANGE_FREQUENCY.static },
   { path: '/privacy', priority: PRIORITY.static, changeFrequency: CHANGE_FREQUENCY.static },
   { path: '/contact', priority: PRIORITY.static, changeFrequency: CHANGE_FREQUENCY.static },
@@ -50,7 +49,7 @@ const STATIC_PAGES = [
  */
 function generateLocaleEntries(locale: Locale, lastModified: Date): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
-  
+
   // Add static pages
   for (const page of STATIC_PAGES) {
     entries.push({
@@ -60,7 +59,7 @@ function generateLocaleEntries(locale: Locale, lastModified: Date): MetadataRout
       priority: page.priority,
     });
   }
-  
+
   // Add tool pages
   const tools = getAllTools();
   for (const tool of tools) {
@@ -71,7 +70,7 @@ function generateLocaleEntries(locale: Locale, lastModified: Date): MetadataRout
       priority: PRIORITY.toolPage,
     });
   }
-  
+
   return entries;
 }
 
@@ -81,13 +80,13 @@ function generateLocaleEntries(locale: Locale, lastModified: Date): MetadataRout
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   const allEntries: MetadataRoute.Sitemap = [];
-  
+
   // Generate entries for each locale
   for (const locale of locales) {
     const localeEntries = generateLocaleEntries(locale, lastModified);
     allEntries.push(...localeEntries);
   }
-  
+
   return allEntries;
 }
 
@@ -100,6 +99,6 @@ export function getSitemapUrlCount(): number {
   const staticPagesCount = STATIC_PAGES.length;
   const toolPagesCount = tools.length;
   const localesCount = locales.length;
-  
+
   return (staticPagesCount + toolPagesCount) * localesCount;
 }

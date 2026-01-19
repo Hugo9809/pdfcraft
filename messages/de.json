@@ -283,13 +283,13 @@
   "contactPage": {
     "hero": {
       "title": "Kontaktieren Sie uns",
-      "description": "Haben Sie eine Frage, einen Vorschlag oder einen Fehler gefunden? Wir würden uns freuen, von Ihnen zu hören."
+      "description": "Haben Sie eine Frage, einen Vorschlag oder einen Fehler gefunden? Wir würden uns freuen, von Ihnen zu hören. Dies ist eine modifizierte Version des Originals."
     },
     "methods": {
       "email": {
-        "title": "E-Mail",
+        "title": "Luca Zanner",
         "description": "Senden Sie uns eine E-Mail und wir antworten innerhalb von 24-48 Stunden.",
-        "action": "contact@pdfcraft.app"
+        "action": "info@lucazanner.de"
       },
       "github": {
         "title": "GitHub",
@@ -1664,6 +1664,120 @@
       "uploadDescription": "FB2-E-Book-Dateien hierher ziehen oder klicken zum Auswählen. Unterstützt mehrere Dateien.",
       "convertButton": "In PDF konvertieren",
       "successMessage": "Ihre FB2-Datei(en) wurde(n) erfolgreich in PDF konvertiert!"
+    }
+  },
+  "privacyPage": {
+    "title": "Datenschutzerklärung",
+    "intro": "Ihre Privatsphäre ist unsere oberste Priorität. {brand} wurde entwickelt, um Ihre Daten bestmöglich zu schützen.",
+    "lastUpdated": "Stand: Dezember 2024",
+    "sections": {
+      "introduction": {
+        "title": "1. Allgemeines",
+        "content": "Der Schutz Ihrer persönlichen Daten ist uns ein wichtiges Anliegen. Nachfolgend informieren wir Sie darüber, wie wir mit Ihren Daten umgehen, wenn Sie unsere PDF-Tools nutzen. Diese Datenschutzerklärung entspricht den Anforderungen der Datenschutz-Grundverordnung (DSGVO)."
+      },
+      "service": {
+        "title": "2. Funktionsweise des Dienstes",
+        "content": "{brand} ist eine client-seitige Anwendung. Das bedeutet:",
+        "list": {
+          "browser": "Die gesamte PDF-Verarbeitung findet direkt in Ihrem Webbrowser statt",
+          "uploads": "Ihre Dateien werden niemals auf unsere Server oder Server Dritter hochgeladen",
+          "access": "Wir können Ihre Dokumente weder einsehen, noch darauf zugreifen oder diese speichern",
+          "device": "Ihre Dateien verbleiben zu jedem Zeitpunkt auf Ihrem Endgerät"
+        }
+      },
+      "collection": {
+        "title": "3. Datenerhebung und -verarbeitung",
+        "files": {
+          "title": "3.1 Ihre Dateien",
+          "content": "<strong1>Wir erheben keine personenbezogenen Daten aus Ihren Dateien.</strong1> Da die Verarbeitung lokal in Ihrem Browser erfolgt, werden keine Dateiinhalte an uns übermittelt. Eine Verarbeitung von personenbezogenen Daten im Sinne der DSGVO durch uns findet in bezug auf Ihre Dokumente nicht statt."
+        },
+        "usage": {
+          "title": "3.2 Nutzungsdaten (Logfiles)",
+          "content": "Zur Verbesserung unseres Angebotes können anonymisierte Nutzungsstatistiken erfasst werden. Dies umfasst:",
+          "list": {
+            "popular": "Nutzungshäufigkeit bestimmter Tools",
+            "region": "Allgemeine geographische Region (auf Länderebene)",
+            "browser": "Browsertyp und -version",
+            "device": "Gerätetyp (Desktop, Mobile, Tablet)"
+          },
+          "note": "Diese Daten sind vollständig anonymisiert und lassen keine Rückschlüsse auf Ihre Person zu."
+        }
+      },
+      "storage": {
+        "title": "4. Lokale Speicherung (Local Storage)",
+        "content": "{brand} nutzt den lokalen Speicher (Local Storage) Ihres Browsers für folgende Zwecke:",
+        "list": {
+          "lang": "Speicherung Ihrer Sprachpräferenz",
+          "history": "Speicherung des Verlaufs der zuletzt genutzten Tools",
+          "progress": "Zwischenspeicherung laufender Arbeiten bei unterbrochenen Sitzungen"
+        },
+        "note": "Diese Daten werden ausschließlich lokal auf Ihrem Gerät gespeichert und nicht an uns übermittelt."
+      },
+      "cookies": {
+        "title": "5. Cookies",
+        "content": "Wir setzen Cookies sparsam und nur für technisch notwendige Funktionen ein:",
+        "list": {
+          "essential": "<strong1>Technisch notwendige Cookies:</strong1> Erforderlich für die Grundfunktionen der Website",
+          "preference": "<strong1>Präferenz-Cookies:</strong1> Speichern Ihre Einstellungen (z.B. Sprache)"
+        },
+        "note": "Wir verwenden keine Tracking- oder Werbe-Cookies, die ein profilbasiertes Tracking ermöglichen."
+      },
+      "thirdParty": {
+        "title": "6. Dienste Dritter",
+        "content": "{brand} gibt keine personenbezogenen Daten an Dritte weiter. Wir nutzen ausdrücklich keine:",
+        "list": {
+          "analytics": "Drittanbieter-Analysetools, die individuelle Nutzer tracken",
+          "ads": "Werbenetzwerke",
+          "social": "Social Media Pixel oder Plugins",
+          "processing": "Externe Dateiverarbeitungsdienste"
+        }
+      },
+      "security": {
+        "title": "7. Datensicherheit",
+        "content": "Da Ihre Dateien Ihr Gerät nicht verlassen, greifen hier die Sicherheitsmechanismen Ihres eigenen Endgerätes. Zu Ihrer Sicherheit empfehlen wir:",
+        "list": {
+          "browser": "Die Nutzung eines aktuellen Browsers",
+          "os": "Regelmäßige Updates Ihres Betriebssystems",
+          "network": "Verwendung sicherer Netzwerke bei der Bearbeitung sensibler Dokumente"
+        }
+      },
+      "rights": {
+        "title": "8. Ihre Rechte (Betroffenenrechte)",
+        "content": "Da wir keine personenbezogenen Daten von Ihnen speichern, können wir Ihnen auch keine Auskunft über diese Daten geben oder diese löschen. Sie haben jederzeit die Möglichkeit, den lokalen Speicher (Local Storage) und Cookies in Ihrem Browser zu löschen, um alle von {brand} gespeicherten Einstellungen zu entfernen. Sollten dennoch personenbezogene Daten verarbeitet werden (z.B. bei einer Kontaktaufnahme per E-Mail), haben Sie das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie auf Datenübertragbarkeit nach Art. 15-21 DSGVO."
+      },
+      "children": {
+        "title": "9. Jugendschutz",
+        "content": "Unser Angebot richtet sich nicht an Kinder unter 16 Jahren. Wir erheben wissentlich keine Daten von Kindern."
+      },
+      "changes": {
+        "title": "10. Änderung dieser Datenschutzerklärung",
+        "content": "Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets den aktuellen rechtlichen Anforderungen entspricht oder um Änderungen unserer Leistungen in der Datenschutzerklärung umzusetzen. Für Ihren erneuten Besuch gilt dann die neue Datenschutzerklärung."
+      },
+      "contact": {
+        "title": "11. Kontakt",
+        "content": "Wenn Sie Fragen zum Datenschutz haben, schreiben Sie uns bitte eine E-Mail oder kontaktieren Sie uns über unser Kontaktformular."
+      }
+    },
+    "highlights": {
+      "server": {
+        "title": "Kein Server-Upload",
+        "description": "Ihre Dateien werden niemals auf einen Server hochgeladen. Die Verarbeitung erfolgt lokal."
+      },
+      "local": {
+        "title": "Lokale Verarbeitung",
+        "description": "PDF-Operationen werden mit JavaScript und WebAssembly direkt auf Ihrem Gerät ausgeführt."
+      },
+      "cleanup": {
+        "title": "Automatische Bereinigung",
+        "description": "Alle Dateidaten werden automatisch gelöscht, wenn Sie den Tab schließen."
+      },
+      "tracking": {
+        "title": "Kein Tracking",
+        "description": "Wir verfolgen weder Ihre Dateiinhalte noch persönlichen Informationen."
+      }
+    },
+    "badge": {
+      "description": "Ihre Dokumente werden sicher in Ihrem Browser verarbeitet"
     }
   }
 }

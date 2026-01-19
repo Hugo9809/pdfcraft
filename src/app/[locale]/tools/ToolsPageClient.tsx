@@ -100,15 +100,15 @@ export default function ToolsPageClient({ locale, localizedToolContent }: ToolsP
         {/* Page Header */}
         <section className="relative pt-36 pb-20 overflow-hidden">
           {/* Animated Background Blobs (Subtle) */}
+          {/* Animated Background Blobs (Removed for Flat Theme) */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[hsl(var(--color-primary)/0.05)] rounded-full mix-blend-multiply filter blur-3xl opacity-50" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[hsl(var(--color-accent)/0.05)] rounded-full mix-blend-multiply filter blur-3xl opacity-50" />
+            <div className="absolute top-0 right-0 w-full h-full bg-[hsl(var(--color-background))]" />
           </div>
 
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-[hsl(var(--color-foreground))] mb-6">
-                <span className="text-gradient">{t('toolsPage.title')}</span>
+                <span className="text-[hsl(var(--color-primary))]">{t('toolsPage.title')}</span>
               </h1>
               <p className="text-lg text-[hsl(var(--color-muted-foreground))] mb-10 leading-relaxed">
                 {t('toolsPage.subtitle', { count: allTools.length })}

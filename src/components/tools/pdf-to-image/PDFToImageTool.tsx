@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { ProcessingProgress, ProcessingStatus } from '../ProcessingProgress';
@@ -8,6 +8,7 @@ import { DownloadButton } from '../DownloadButton';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { pdfToImages, type ImageFormat, type PDFToImageOptions, type PageLayoutPreset, type PageLayoutOptions } from '@/lib/pdf/processors/pdf-to-image';
+import { usePendingFile } from '@/lib/contexts/PendingFileContext';
 import type { UploadedFile, ProcessOutput } from '@/types/pdf';
 import JSZip from 'jszip';
 
@@ -34,6 +35,7 @@ export interface PDFToImageToolProps {
 export function PDFToImageTool({ className = '', outputFormat }: PDFToImageToolProps) {
   const t = useTranslations('common');
   const tTools = useTranslations('tools');
+  const { consumePendingFile } = usePendingFile();
 
   // State
   const [file, setFile] = useState<UploadedFile | null>(null);
@@ -57,6 +59,24 @@ export function PDFToImageTool({ className = '', outputFormat }: PDFToImageToolP
 
   // Ref for cancellation
   const cancelledRef = useRef(false);
+
+  // Check for pending file on mount
+  useEffect(() => {
+    // Try multiple tool slugs that might use this component
+    const toolSlugs = ['pdf-to-jpg', 'pdf-to-png', 'pdf-to-webp', 'pdf-to-bmp', 'pdf-to-tiff'];
+    for (const slug of toolSlugs) {
+      const pendingFile = consumePendingFile(slug);
+      if (pendingFile) {
+        const uploadedFile: UploadedFile = {
+          id: generateId(),
+          file: pendingFile,
+          status: 'pending' as const,
+        };
+        setFile(uploadedFile);
+        break;
+      }
+    }
+  }, [consumePendingFile]);
 
 
   /**

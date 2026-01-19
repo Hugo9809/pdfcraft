@@ -12,10 +12,12 @@ export interface RecentFile {
   processedAt: string; // ISO date string for serialization
   toolUsed: string;
   toolName?: string;
+  storagePath?: string; // OPFS path for the stored file
 }
 
 const STORAGE_KEY = 'pdfcraft_recent_files';
 const MAX_RECENT_FILES = 10;
+export const RECENT_FILES_EVENT = 'pdfcraft_recent_files_update';
 
 /**
  * Generate a unique ID for a file entry
@@ -40,15 +42,24 @@ function isLocalStorageAvailable(): boolean {
 }
 
 /**
+ * Dispatch recent files update event
+ */
+function dispatchUpdateEvent() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(RECENT_FILES_EVENT));
+  }
+}
+
+/**
  * Get all recent files from localStorage
  */
 export function getRecentFiles(): RecentFile[] {
   if (!isLocalStorageAvailable()) return [];
-  
+
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
-    
+
     const files = JSON.parse(stored) as RecentFile[];
     return Array.isArray(files) ? files : [];
   } catch {
@@ -63,7 +74,8 @@ export function addRecentFile(
   name: string,
   size: number,
   toolUsed: string,
-  toolName?: string
+  toolName?: string,
+  storagePath?: string
 ): RecentFile {
   const newFile: RecentFile = {
     id: generateId(),
@@ -72,22 +84,24 @@ export function addRecentFile(
     processedAt: new Date().toISOString(),
     toolUsed,
     toolName,
+    storagePath,
   };
-  
+
   if (!isLocalStorageAvailable()) return newFile;
-  
+
   try {
     const files = getRecentFiles();
-    
+
     // Remove duplicate entries with same name and tool
     const filtered = files.filter(
       (f) => !(f.name === name && f.toolUsed === toolUsed)
     );
-    
+
     // Add new file at the beginning
     const updated = [newFile, ...filtered].slice(0, MAX_RECENT_FILES);
-    
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    dispatchUpdateEvent();
     return newFile;
   } catch {
     return newFile;
@@ -99,11 +113,12 @@ export function addRecentFile(
  */
 export function removeRecentFile(id: string): void {
   if (!isLocalStorageAvailable()) return;
-  
+
   try {
     const files = getRecentFiles();
     const updated = files.filter((f) => f.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    dispatchUpdateEvent();
   } catch {
     // Silently fail
   }
@@ -114,9 +129,10 @@ export function removeRecentFile(id: string): void {
  */
 export function clearRecentFiles(): void {
   if (!isLocalStorageAvailable()) return;
-  
+
   try {
     localStorage.removeItem(STORAGE_KEY);
+    dispatchUpdateEvent();
   } catch {
     // Silently fail
   }
@@ -127,11 +143,11 @@ export function clearRecentFiles(): void {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
-  
+
   const units = ['B', 'KB', 'MB', 'GB'];
   const k = 1024;
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${units[i]}`;
 }
 
@@ -146,12 +162,12 @@ export function formatDate(isoString: string): string {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-    
+
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
+
     return date.toLocaleDateString();
   } catch {
     return '';
