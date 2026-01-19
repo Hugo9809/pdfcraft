@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { ProcessingProgress, ProcessingStatus } from '../ProcessingProgress';
 import { DownloadButton } from '../DownloadButton';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { 
-  textToPDF, 
+import { usePendingFile } from '@/lib/contexts/PendingFileContext';
+import {
+  textToPDF,
   AVAILABLE_FONTS,
   hexToRgb,
-  type TextPageSizeType, 
+  type TextPageSizeType,
   type TextToPDFOptions,
   type PageOrientation,
   type FontId
@@ -31,7 +32,8 @@ type InputMode = 'upload' | 'text';
 export function TextToPDFTool({ className = '' }: TextToPDFToolProps) {
   const t = useTranslations('common');
   const tTools = useTranslations('tools');
-  
+  const { consumePendingFile } = usePendingFile();
+
   const [inputMode, setInputMode] = useState<InputMode>('upload');
   const [directText, setDirectText] = useState('');
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -39,9 +41,10 @@ export function TextToPDFTool({ className = '' }: TextToPDFToolProps) {
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [result, setResult] = useState<Blob | null>(null);
+  const [resultFileName, setResultFileName] = useState<string>('from_text.pdf');
   const [error, setError] = useState<string | null>(null);
   const [textPreview, setTextPreview] = useState<string>('');
-  
+
   const [pageSize, setPageSize] = useState<TextPageSizeType>('A4');
   const [customWidth, setCustomWidth] = useState(595);
   const [customHeight, setCustomHeight] = useState(842);
@@ -52,8 +55,19 @@ export function TextToPDFTool({ className = '' }: TextToPDFToolProps) {
   const [textColor, setTextColor] = useState('#000000');
   const [preserveLineBreaks, setPreserveLineBreaks] = useState(true);
   const [wrapLines, setWrapLines] = useState(true);
-  
+
   const cancelledRef = useRef(false);
+
+  // Check for pending file (from recent files) and show as result
+  useEffect(() => {
+    const pendingFile = consumePendingFile('txt-to-pdf');
+    if (pendingFile) {
+      console.log('Loading pending file as result:', pendingFile.name);
+      setResult(pendingFile);
+      setResultFileName(pendingFile.name);
+      setStatus('complete');
+    }
+  }, [consumePendingFile]);
 
   const handleFilesSelected = useCallback(async (newFiles: File[]) => {
     const uploadedFiles: UploadedFile[] = newFiles.map(file => ({
@@ -93,7 +107,7 @@ export function TextToPDFTool({ className = '' }: TextToPDFToolProps) {
     const hasFiles = files.length >= 1;
     const hasDirectText = inputMode === 'text' && directText.trim().length > 0;
     if (!hasFiles && !hasDirectText) {
-      setError(inputMode === 'text' 
+      setError(inputMode === 'text'
         ? (tTools('txtToPdf.noTextError') || 'Please enter some text to convert.')
         : (tTools('txtToPdf.noFilesError') || 'Please add at least 1 text file.'));
       return;
@@ -321,7 +335,7 @@ export function TextToPDFTool({ className = '' }: TextToPDFToolProps) {
         </Button>
         {result && (
           <DownloadButton file={result}
-            filename={inputMode === 'text' ? 'from_text.pdf' : (files.length === 1 ? `${files[0].file.name.replace(/\.[^/.]+$/, '')}.pdf` : `text_${files.length}_files.pdf`)}
+            filename={resultFileName || (inputMode === 'text' ? 'from_text.pdf' : (files.length === 1 ? `${files[0].file.name.replace(/\.[^/.]+$/, '')}.pdf` : `text_${files.length}_files.pdf`))}
             variant="secondary" size="lg" showFileSize />
         )}
       </div>

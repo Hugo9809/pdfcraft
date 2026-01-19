@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { ProcessingProgress, ProcessingStatus } from '../ProcessingProgress';
 import { DownloadButton } from '../DownloadButton';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { usePendingFile } from '@/lib/contexts/PendingFileContext';
 import { imagesToPDF, imagesToPDFBatch, PAGE_SIZES, type PageSizeType, type ImageToPDFOptions, type BatchExportResult } from '@/lib/pdf/processors/image-to-pdf';
 import type { UploadedFile, ProcessOutput } from '@/types/pdf';
 
@@ -33,6 +34,7 @@ export interface ImageToPDFToolProps {
 export function ImageToPDFTool({ className = '', imageType }: ImageToPDFToolProps) {
   const t = useTranslations('common');
   const tTools = useTranslations('tools');
+  const { consumePendingFile } = usePendingFile();
 
   // State
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -40,6 +42,7 @@ export function ImageToPDFTool({ className = '', imageType }: ImageToPDFToolProp
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [result, setResult] = useState<Blob | null>(null);
+  const [resultFileName, setResultFileName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   // Options state
@@ -61,6 +64,22 @@ export function ImageToPDFTool({ className = '', imageType }: ImageToPDFToolProp
 
   // Ref for cancellation
   const cancelledRef = useRef(false);
+
+  // Check for pending file (from recent files) and show as result
+  useEffect(() => {
+    // Try both generic tool slug and specific ones if they exist
+    const toolSlugs = ['image-to-pdf', 'jpg-to-pdf', 'png-to-pdf', 'img-to-pdf'];
+    for (const slug of toolSlugs) {
+      const pendingFile = consumePendingFile(slug);
+      if (pendingFile) {
+        console.log('Loading pending file as result:', pendingFile.name);
+        setResult(pendingFile);
+        setResultFileName(pendingFile.name);
+        setStatus('complete');
+        break;
+      }
+    }
+  }, [consumePendingFile]);
 
   /**
    * Get accepted file types based on imageType prop
@@ -582,7 +601,7 @@ export function ImageToPDFTool({ className = '', imageType }: ImageToPDFToolProp
         {result && (
           <DownloadButton
             file={result}
-            filename={files.length === 1 ? `${files[0].file.name.replace(/\.[^/.]+$/, '')}.pdf` : `images_${files.length}_pages.pdf`}
+            filename={resultFileName || (files.length === 1 ? `${files[0].file.name.replace(/\.[^/.]+$/, '')}.pdf` : `images_${files.length}_pages.pdf`)}
             variant="secondary"
             size="lg"
             showFileSize

@@ -43,6 +43,7 @@ export function PDFToImageTool({ className = '', outputFormat }: PDFToImageToolP
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [result, setResult] = useState<Blob | Blob[] | null>(null);
+  const [resultFileName, setResultFileName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   // Options state
@@ -67,12 +68,21 @@ export function PDFToImageTool({ className = '', outputFormat }: PDFToImageToolP
     for (const slug of toolSlugs) {
       const pendingFile = consumePendingFile(slug);
       if (pendingFile) {
-        const uploadedFile: UploadedFile = {
-          id: generateId(),
-          file: pendingFile,
-          status: 'pending' as const,
-        };
-        setFile(uploadedFile);
+        // For PDF to Image, the pending file is likely the result (zip or image)
+        // We want to show it as a result so the user can re-download it
+        console.log('Loading pending file as result:', pendingFile.name);
+        setResult(pendingFile);
+        setResultFileName(pendingFile.name);
+        setStatus('complete');
+
+        // Also ensure the format matches the file extension if possible
+        const ext = pendingFile.name.split('.').pop()?.toLowerCase();
+        if (ext && ['jpg', 'png', 'webp', 'bmp', 'tiff'].includes(ext)) {
+          setFormat(ext as ImageFormat);
+        } else if (pendingFile.name.endsWith('.zip')) {
+          // If it's a zip, we can't easily guess the format of contents without inspecting, 
+          // but we can trust the current tool's format default or user setting
+        }
         break;
       }
     }
@@ -598,7 +608,7 @@ export function PDFToImageTool({ className = '', outputFormat }: PDFToImageToolP
         {result && !isMultipleImages && (
           <DownloadButton
             file={result as Blob}
-            filename={`${file?.file.name.replace(/\.pdf$/i, '')}.${format === 'jpeg' ? 'jpg' : format}`}
+            filename={resultFileName || `${file?.file.name.replace(/\.pdf$/i, '')}.${format === 'jpeg' ? 'jpg' : format}`}
             variant="secondary"
             size="lg"
             showFileSize

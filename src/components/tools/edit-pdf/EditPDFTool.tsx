@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { saveFileToOPFS, loadFileFromOPFS, deleteFileFromOPFS } from '@/lib/storage/file-system';
+import { usePendingFile } from '@/lib/contexts/PendingFileContext';
 import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { Button } from '@/components/ui/Button';
@@ -24,6 +25,7 @@ export interface EditPDFToolProps {
 export function EditPDFTool({ className = '' }: EditPDFToolProps) {
   const t = useTranslations('common');
   const tTools = useTranslations('tools.editPdf');
+  const { consumePendingFile } = usePendingFile();
 
   const [file, setFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -111,12 +113,24 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
     };
   }, []);
 
-  // Restore session
+  // Restore session or load pending file
   useEffect(() => {
-    const restoreSession = async () => {
-      // Only restore if we don't have a file yet
+    const initializeFile = async () => {
+      // Only initialize if we don't have a file yet
       if (file) return;
 
+      // First, check if there's a pending file from recent files dropdown
+      const pendingFile = consumePendingFile('edit-pdf');
+      if (pendingFile) {
+        console.log('Loading pending file from recent files:', pendingFile.name);
+        setFile(pendingFile);
+        setPdfUrl(URL.createObjectURL(pendingFile));
+        // Save to session for persistence
+        saveFileToOPFS(SESSION_FILE_NAME, pendingFile).catch(console.error);
+        return;
+      }
+
+      // Otherwise, try to restore from OPFS session
       try {
         const blob = await loadFileFromOPFS(SESSION_FILE_NAME);
         if (blob) {
@@ -145,8 +159,8 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
         console.log('No existing edit session to restore');
       }
     };
-    restoreSession();
-  }, []);
+    initializeFile();
+  }, [consumePendingFile]);
 
   const handleFilesSelected = useCallback((files: File[]) => {
     if (files.length > 0) {

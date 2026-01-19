@@ -122,28 +122,44 @@ export const RecentFilesDropdown: React.FC<RecentFilesDropdownProps> = ({
    * Loads the file from OPFS if available and navigates to the tool
    */
   const handleFileClick = useCallback(async (file: RecentFile) => {
+    console.log('handleFileClick called with file:', file);
     setLoadingFileId(file.id);
 
     try {
       if (file.storagePath) {
+        console.log('Loading file from OPFS:', file.storagePath);
         // Load file from OPFS
         const blob = await loadFileFromOPFS(file.storagePath);
+        console.log('File loaded from OPFS, size:', blob.size);
         // Convert Blob to File with proper name
         const loadedFile = new File([blob], file.name, { type: blob.type || 'application/pdf' });
         // Set as pending file for the tool to consume
-        setPendingFile(loadedFile, file.toolUsed, file.name);
+        // Open in the original tool that was used with this file
+        const targetTool = file.toolUsed;
+        setPendingFile(loadedFile, targetTool, file.name);
+
+        setIsOpen(false);
+        setFocusedIndex(-1);
+        setLoadingFileId(null);
+
+        // Navigate to the appropriate tool
+        console.log('Navigating to tool:', targetTool);
+        router.push(`/${locale}/tools/${targetTool}`);
+      } else {
+        console.log('No storagePath for file, just navigating to tool');
+        setIsOpen(false);
+        setFocusedIndex(-1);
+        setLoadingFileId(null);
+        router.push(`/${locale}/tools/${file.toolUsed}`);
       }
     } catch (error) {
-      console.warn('Failed to load file from OPFS:', error);
-      // Continue with navigation even if file loading fails
+      console.error('Failed to load file from OPFS:', error);
+      setIsOpen(false);
+      setFocusedIndex(-1);
+      setLoadingFileId(null);
+      // Navigate to tool anyway
+      router.push(`/${locale}/tools/${file.toolUsed}`);
     }
-
-    setIsOpen(false);
-    setFocusedIndex(-1);
-    setLoadingFileId(null);
-
-    // Navigate to the tool
-    router.push(`/${locale}/tools/${file.toolUsed}`);
   }, [locale, router, setPendingFile]);
 
   if (isLoading) {
