@@ -506,7 +506,7 @@ export const tools: Tool[] = [
     maxFileSize: DEFAULT_MAX_FILE_SIZE,
     maxFiles: 1,
     features: ['preserve-formatting', 'preserve-images', 'chapter-structure'],
-    relatedTools: ['word-to-pdf', 'txt-to-pdf', 'html-to-pdf'],
+    relatedTools: ['word-to-pdf', 'txt-to-pdf'],
   },
   {
     id: 'mobi-to-pdf',

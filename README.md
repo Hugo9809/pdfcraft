@@ -222,7 +222,7 @@ To run this project locally, follow these steps:
     ```
 
 4.  **Open your browser**
-    Navigate to [http://localhost:3000](http://localhost:3000) to see the application running.
+    Navigate to [http://localhost:8080](http://localhost:8080) to see the application running.
 
 ### Docker Compose
 
@@ -234,7 +234,7 @@ If you prefer running PDFCraft in containers, you can use the provided `docker-c
 docker compose --profile dev up
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:8080](http://localhost:8080).
 
 #### Static export + Nginx (production-like)
 

@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { 
-  tools, 
-  getAllTools, 
-  getToolById, 
+import {
+  tools,
+  getAllTools,
+  getToolById,
   getToolsByCategory,
   toolExists,
   getAllToolIds,
 } from '@/config/tools';
-import { 
-  TOOL_CATEGORIES, 
+import {
+  TOOL_CATEGORIES,
   type ToolCategory,
 } from '@/types/tool';
 import {
@@ -34,13 +34,13 @@ describe('Tool Configuration Property Tests', () => {
           (tool) => {
             // Tool must have a category
             expect(tool.category).toBeDefined();
-            
+
             // Category must be one of the 6 defined categories
             expect(TOOL_CATEGORIES).toContain(tool.category);
-            
+
             // Verify it's exactly one category (not an array or multiple)
             expect(typeof tool.category).toBe('string');
-            
+
             return true;
           }
         ),
@@ -50,7 +50,7 @@ describe('Tool Configuration Property Tests', () => {
 
     it('all 6 categories are represented in the tools', () => {
       const categoriesInUse = new Set(tools.map(t => t.category));
-      
+
       for (const category of TOOL_CATEGORIES) {
         expect(categoriesInUse.has(category)).toBe(true);
       }
@@ -62,16 +62,16 @@ describe('Tool Configuration Property Tests', () => {
           fc.constantFrom(...TOOL_CATEGORIES),
           (category) => {
             const categoryTools = getToolsByCategory(category);
-            
+
             // All returned tools must have the specified category
             for (const tool of categoryTools) {
               expect(tool.category).toBe(category);
             }
-            
+
             // Count should match manual filter
             const manualCount = tools.filter(t => t.category === category).length;
             expect(categoryTools.length).toBe(manualCount);
-            
+
             return true;
           }
         ),
@@ -81,7 +81,7 @@ describe('Tool Configuration Property Tests', () => {
 
     it('no tool has an invalid category', () => {
       const invalidCategories = ['invalid', 'unknown', '', null, undefined];
-      
+
       for (const tool of tools) {
         expect(invalidCategories).not.toContain(tool.category);
         expect(TOOL_CATEGORIES).toContain(tool.category);
@@ -106,7 +106,7 @@ describe('Tool Configuration Property Tests', () => {
             expect(tool.relatedTools).toBeDefined();
             expect(Array.isArray(tool.relatedTools)).toBe(true);
             expect(tool.relatedTools.length).toBeGreaterThanOrEqual(2);
-            
+
             return true;
           }
         ),
@@ -116,7 +116,7 @@ describe('Tool Configuration Property Tests', () => {
 
     it('all related tool IDs reference existing tools', () => {
       const allToolIds = getAllToolIds();
-      
+
       fc.assert(
         fc.property(
           fc.constantFrom(...tools),
@@ -126,7 +126,7 @@ describe('Tool Configuration Property Tests', () => {
               expect(allToolIds).toContain(relatedId);
               expect(toolExists(relatedId)).toBe(true);
             }
-            
+
             return true;
           }
         ),
@@ -190,22 +190,22 @@ describe('Tool Configuration Property Tests', () => {
           fc.constantFrom(...knownQueries),
           (query) => {
             const results = searchTools(query);
-            
+
             // All results should have a positive score
             for (const result of results) {
               expect(result.score).toBeGreaterThan(0);
-              
+
               // Verify the tool actually has some relevance to the query
               const toolName = result.tool.id.replace(/-/g, ' ').toLowerCase();
               const features = result.tool.features.map(f => f.replace(/-/g, ' ').toLowerCase());
-              
+
               // At least one of these should have some match
               const hasNameMatch = fuzzyMatch(query, toolName) > 0;
               const hasFeatureMatch = features.some(f => fuzzyMatch(query, f) > 0);
-              
+
               expect(hasNameMatch || hasFeatureMatch).toBe(true);
             }
-            
+
             return true;
           }
         ),
@@ -215,7 +215,7 @@ describe('Tool Configuration Property Tests', () => {
 
     it('empty query returns no results', () => {
       const emptyQueries = ['', '   ', '\t', '\n'];
-      
+
       for (const query of emptyQueries) {
         const results = searchTools(query);
         expect(results.length).toBe(0);
@@ -229,16 +229,16 @@ describe('Tool Configuration Property Tests', () => {
           (tool) => {
             const toolName = tool.id.replace(/-/g, ' ');
             const results = searchTools(toolName);
-            
+
             // The exact tool should be in results
             const matchingResult = results.find(r => r.tool.id === tool.id);
             expect(matchingResult).toBeDefined();
-            
+
             // It should have a high score (>= 0.7 for exact/near-exact matches)
             if (matchingResult) {
               expect(matchingResult.score).toBeGreaterThanOrEqual(0.5);
             }
-            
+
             return true;
           }
         ),
@@ -248,18 +248,18 @@ describe('Tool Configuration Property Tests', () => {
 
     it('search results are sorted by relevance score descending', () => {
       const queries = ['pdf', 'merge', 'convert', 'image', 'edit'];
-      
+
       fc.assert(
         fc.property(
           fc.constantFrom(...queries),
           (query) => {
             const results = searchTools(query);
-            
+
             // Verify descending order
             for (let i = 1; i < results.length; i++) {
               expect(results[i - 1].score).toBeGreaterThanOrEqual(results[i].score);
             }
-            
+
             return true;
           }
         ),
@@ -275,10 +275,10 @@ describe('Tool Configuration Property Tests', () => {
             // Tool should match its own name
             const toolName = tool.id.replace(/-/g, ' ');
             expect(toolMatchesQuery(tool, toolName)).toBe(true);
-            
+
             // Tool should match empty query (shows all)
             expect(toolMatchesQuery(tool, '')).toBe(true);
-            
+
             return true;
           }
         ),
@@ -321,7 +321,7 @@ describe('Tool Configuration Property Tests', () => {
 
     it('getAllTools returns all 67 tools', () => {
       const allTools = getAllTools();
-      expect(allTools.length).toBe(67);
+      expect(allTools.length).toBe(83);
     });
 
     it('all tools have required properties', () => {
@@ -342,7 +342,7 @@ describe('Tool Configuration Property Tests', () => {
             expect(Array.isArray(tool.features)).toBe(true);
             expect(tool.features.length).toBeGreaterThan(0);
             expect(Array.isArray(tool.relatedTools)).toBe(true);
-            
+
             return true;
           }
         ),
